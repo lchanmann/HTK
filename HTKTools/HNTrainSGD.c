@@ -584,7 +584,8 @@ void SetConfParms(void)
                 HError(4322, "SetConfParms: Unknown objective function kind");
         }
         /* set evaluation criteria */
-        if (GetConfStr(cParm, nParm, "EVALCRITERIA", buf)) {
+        /* cl9p8 - EVALCRITERION */
+        if (GetConfStr(cParm, nParm, "EVALCRITERION", buf)) {
             charPtr = buf;
             while (charPtr != NULL) {
                 charPtr2 = strchr(charPtr, '|');
