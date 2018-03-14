@@ -196,7 +196,8 @@ UttElem *GetCurUttElem(DataCache *cache);
 FBLatInfo *LoadXFormsFromUttElem(UttElem *uttElem, FBLatInfo *fbInfo);
 FBLatInfo *LoadNumLatsFromUttElem(UttElem *uttElem, FBLatInfo *fbInfo);
 FBLatInfo *LoadDenLatsFromUttElem(UttElem *uttElem, FBLatInfo *fbInfo);
-void UpdateTargetLogPrior(DataCache *cache, float offset);
+/* cl9p8 - target penalty */
+void UpdateTargetPenalty(DataCache *cache, float weight, float offset);
 
 void ResetCache(DataCache *cache);
 void FreeCache(DataCache *cache);

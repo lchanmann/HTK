@@ -165,6 +165,8 @@ static Vector List_WeightDecay = NULL;
 /*static float weightDecay = 0.0; */                /* the factor for weight decay */
 static int epochOff = 1;                        /* current epoch offset */
 static float logObsvPrior = 0.0;		/* logP(O) */
+/* cl9p8 - target panelty */
+static float logStateOccWeight = 1.0;           /* weight of logP(s) */
 
 static char *hmmListFn = NULL;                  /* model list filename (optional) */  
 static char *hmmDir = NULL;                     /* directory to look for HMM def files */
@@ -674,6 +676,9 @@ void SetConfParms(void)
         /* update the log observation prior */
         if (GetConfFlt(cParm, nParm, "LOGPRIOROBSV", &doubleVal)) 
             logObsvPrior = (float) doubleVal;
+        /* cl9p8 - target penalty */
+        if (GetConfFlt(cParm, nParm, "LOGSTATEOCCWEIGHT", &doubleVal))
+            logStateOccWeight = (float) doubleVal;
         /* cz277 - semi */
         if (GetConfInt(cParm, nParm, "BGNPLBATCHWAIT", &intVal)) {
             if (intVal < 0) 
@@ -2484,7 +2489,8 @@ void BatchLevelTrainProcess(int curEpochNum) {
     /* update the target penalties */
     if ((curEpochNum == 0) && ((uFlags & UPTARGETPEN) != 0) && (hset.hsKind == HYBRIDHS))
         for (i = 1; i <= S; ++i) 
-            UpdateTargetLogPrior(cacheTr[i], logObsvPrior);
+            /* cl9p8 - target penalty */
+            UpdateTargetPenalty(cacheTr[i], logStateOccWeight, logObsvPrior);
     /* show criteria */
     for (i = 1; i <= S; ++i) {
         if (S > 1) 
@@ -2719,7 +2725,8 @@ void UtterLevelTrainProcess(int curEpochNum) {
     /* update the target penalties */
     if (((uFlags & UPTARGETPEN) != 0) && (hset.hsKind == HYBRIDHS)) 
         for (i = 1; i <= S; ++i) 
-            UpdateTargetLogPrior(cacheTr[i], logObsvPrior);
+            /* cl9p8 - target penalty */
+            UpdateTargetPenalty(cacheTr[i], logStateOccWeight, logObsvPrior);
     /* update the transition probabilities */
     if ((uFlags & UPTRANS) != 0) 
         UpdateAllTrans();
@@ -2902,7 +2909,8 @@ void UtterLevelStaticUpdate(int curUpdtCode) {
     /* update the target penalties */
     if ((curUpdtCode == 0) && ((uFlags & UPTARGETPEN) != 0) && (hset.hsKind == HYBRIDHS)) 
         for (i = 1; i <= S; ++i) 
-            UpdateTargetLogPrior(cacheTr[i], logObsvPrior);
+            /* cl9p8 - target penalty */
+            UpdateTargetPenalty(cacheTr[i], logStateOccWeight, logObsvPrior);
     /* reset all cache */
     for (i = 1; i <= S; ++i) 
         ResetCache(cacheTr[i]);

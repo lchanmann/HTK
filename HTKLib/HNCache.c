@@ -1929,8 +1929,9 @@ Boolean FillAllInpBatch(DataCache *cache, int *nSamples, int *uttCnt) {
     return finish;
 }
 
-/* update the log prior list  */
-void UpdateTargetLogPrior(DataCache *cache, float offset) {
+/* cl9p8 - target penalty */
+/* adjust log state occ weight and update the log prior list  */
+void UpdateTargetPenalty(DataCache *cache, float weight, float offset);
     /*HMMSet *hset;*/
     MLink m, mret;
     HLink hmm;
@@ -1988,7 +1989,8 @@ void UpdateTargetLogPrior(DataCache *cache, float offset) {
                     streamElem = &hmm->svec[s].info->pdf[cache->streamIdx];
                     if (streamElem->occAcc < 0.0) {
                         streamElem->occAcc = streamElem->targetPen;
-                        streamElem->targetPen = (float) ((-1.0) * log(streamElem->targetPen / tOcc) + offset);
+                        /* cl9p8 - target penalty */
+                        streamElem->targetPen = (float) ((-1.0) * weight * log(streamElem->targetPen / tOcc) + offset);
                     }
                 }
             }
