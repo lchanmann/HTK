@@ -405,6 +405,9 @@ void DivideNMatrixByRow(NMatrix *srcMat, NVector *normVec, NMatrix *dstMat);
 /* cz277 - xform */
 int ClipInt(int min, int max, int val);
 
+/* cl9p8 - dropout */
+void MulNMatrixByCol(NMatrix *valMat, NVector *segVec, int row, NMatrix *resMat);
+
 #ifdef __cplusplus
 }
 #endif

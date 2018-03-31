@@ -1314,6 +1314,10 @@ void Initialise(void) {
     }
     SetupNMatRPLInfo(&hset);
     SetupNVecRPLInfo(&hset);
+
+    /* cl9p8 - dropout mask */
+    CreateDropoutMask(hset.annSet);
+
     /* for training set */
     obs = MakeObservation(&gcheap, hset.swidth, hset.pkind, FALSE, eSep);
     scriptTr = GetTrainScript(&scriptCntTr);
@@ -1815,6 +1819,9 @@ ReturnStatus ReloadHMMSet(MSILink MSIPtr) {
     /* cz277 - batch sync */
     SetFeaMixBatchIndex(hset.annSet, GetGlobalBatchIndex());
     SetNBundleBatchIndex(hset.annSet, GetGlobalBatchIndex());
+
+    /* cl9p8 - dropout mask */
+    CreateDropoutMask(hset.annSet);
 
     /* update cache associated configs */
     for (i = 1; i <= hset.swidth[0]; ++i) 
@@ -3239,6 +3246,9 @@ int main(int argc, char *argv[]) {
     printf("\n");
     /* cz277 - pact */
     if (optDoStaticUpdt == FALSE) {
+        /* cl9p8 - dropout */
+        SetDropoutEnabled(scriptHV != NULL);
+
         /* process the held-out validation set first */
         if (initialHV == TRUE && scriptHV != NULL) {
             printf("Init Training ************************\n");

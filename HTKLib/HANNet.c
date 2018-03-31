@@ -92,6 +92,13 @@ static char inDirStrNVecRPLInfo[MAXSTRLEN];
 static char extStrNVecRPLInfo[MAXSTRLEN];
 static char outDirStrNVecRPLInfo[MAXSTRLEN];
 
+/* cl9p8 - dropoutMask */
+static NVector *dropoutMask = NULL;
+static int dropoutNodeNum = 0;              /* the number of nodes in dropout layer */
+static float inputDropoutRate = 0.0;        /* input layer dropout rate */
+static float hiddenDropoutRate = 0.0;       /* hidden layer dropout rate */
+static Boolean dropoutEnabled = FALSE;      /* control ApplyDropoutMask flag */
+
 /* get the batch size */
 int GetNBatchSamples(void) {
     return batchSamples;
@@ -271,6 +278,13 @@ void InitANNet(void)
                     strcat(outDirStrNVecRPLInfo, ";");
                 cpVal = cpVal->append;
             }
+        }
+        /* cl9p8 - Dropout */
+        if (GetConfFlt(cParm, nParm, "INPUTDROPOUTRATE", &doubleVal)) {
+            inputDropoutRate = (float) doubleVal;
+        }
+        if (GetConfFlt(cParm, nParm, "HIDDENDROPOUTRATE", &doubleVal)) {
+            hiddenDropoutRate = (float) doubleVal;
         }
     }
 
@@ -984,6 +998,10 @@ void ForwardProp(ANNSet *annSet, int batLen, int *CMDVecPL) {
         for (i = 0; i < annDef->layerNum; ++i) {
             layerElem = annDef->layerList[i];
             FillBatchFromFeaMix(layerElem, batLen);
+
+            /* cl9p8 - dropout */
+            ApplyDropoutMask(layerElem, batLen);
+
             switch (layerElem->layerKind) {
             case ACTIVATIONONLYLAK: ForwardPropActivationOnlyLayer(batLen, layerElem); break;
             case CONVOLUTIONLAK: ForwardPropConvolutionLayer(batLen, layerElem); break;
@@ -1539,6 +1557,87 @@ void CancelBundleTrace(MemHeap *heap, LELink layerElem, BTLink *head) {
        (*prev)->nextTrace = (*trace)->nextTrace; 
     if (heap->type != MSTAK)
         Dispose(heap, *trace);
+}
+
+/* cl9p8 - dropout */
+static void AssignDropoutRate(LELink layerElem, float dropoutRate) {
+    /* safety check */
+    if (!(dropoutRate >= 0.0 && dropoutRate < 1.0)) {
+        HError(8720, "AssignDropoutRate: dropoutRate should be in [0, 1)");
+    }
+
+    layerElem->trainInfo->dropoutRate = dropoutRate;
+}
+
+void CreateDropoutMask(ANNSet *annSet) {
+    int i;
+    float dropoutRate;
+
+    AILink curAI;
+    ADLink annDef;
+    LELink layerElem;
+
+    if (inputDropoutRate > 0.0 || hiddenDropoutRate > 0.0) {
+        /* init the ANNInfo pointer */
+        curAI = annSet->defsHead;
+        /* proceed in the forward fashion */
+        while (curAI != NULL) {
+            /* fetch current ANNDef */
+            annDef = curAI->annDef;
+            /* assign input/hidden layers dropout */
+            for (i = 0; i < annDef->layerNum; ++i) {
+                layerElem = annDef->layerList[i];
+                dropoutRate = (i == 0 ? inputDropoutRate : hiddenDropoutRate);
+                AssignDropoutRate(layerElem, dropoutRate);
+                dropoutNodeNum = MAX(dropoutNodeNum, layerElem->inputDim);
+            }
+            /* get the next ANNDef */
+            curAI = curAI->next;
+        }
+
+        dropoutMask = CreateNVector(&gstack, dropoutNodeNum);
+    }
+}
+
+void FreeDropoutMask(void) {
+    if (dropoutMask != NULL) {
+        dropoutMask->vecLen = dropoutNodeNum;
+        FreeNVector(&gstack, dropoutMask);
+        dropoutMask = NULL;
+    }
+}
+
+void SetDropoutEnabled(Boolean flag) {
+    dropoutEnabled = flag;
+}
+
+void ApplyDropoutMask(LELink layerElem, int batLen) {
+    /* check dropoutEnabled */
+    if (dropoutEnabled == FALSE) return;
+
+    int i, n;
+    NFloat scale;
+
+    if (layerElem->trainInfo->dropoutRate > 0.0) {
+        /* up-scale during training to ensure test time total input consistency */
+        scale = 1.0 / (1.0 - layerElem->trainInfo->dropoutRate);
+        dropoutMask->vecLen = layerElem->inputDim;
+
+        n = IntVecSize(layerElem->drvCtx);
+        for (i = 1; i <= n; ++i) {
+
+            ClearNVector(dropoutMask);
+#ifdef CUDA
+            SyncNVectorDev2Host(dropoutMask);
+#endif
+            RandMaskNSegment(1.0 - layerElem->trainInfo->dropoutRate, scale, dropoutMask->vecLen, dropoutMask->vecElems);
+#ifdef CUDA
+            SyncNVectorHost2Dev(dropoutMask);
+#endif
+            /* x = x .* m, m is the dropout binary mask */
+            MulNMatrixByCol(layerElem->xFeaMats[i], dropoutMask, batLen, layerElem->xFeaMats[i]);
+        }
+    }
 }
 
 /* ------------------------- End of HANNet.c ------------------------- */

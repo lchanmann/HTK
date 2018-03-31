@@ -4781,4 +4781,32 @@ int ClipInt(int min, int max, int val) {
         return val;
 }
 
+/* cl9p8 - dropout */
+static inline void MulNMatrixByColCPU(NFloat *valPtr, NFloat *segPtr, int row, int segLen, NFloat *resPtr) {
+    int i, j;
+
+    for (i = 0; i < row; ++i) {
+        for (j = 0; j < segLen; ++j) {
+            resPtr[i * segLen + j] = valPtr[i * segLen + j] * segPtr[j];
+        }
+    }
+}
+
+void MulNMatrixByCol(NMatrix *valMat, NVector *segVec, int row, NMatrix *resMat) {
+    /* safety check */
+    if (trace & T_DIM) {
+        if (!(row > 0 && row <= valMat->rowNum && row <= resMat->rowNum))
+            HError(5221, "MaskNMatrix: Matrix row inconsistent");
+        if (!(valMat->colNum == segVec->vecLen && resMat->colNum == segVec->vecLen))
+            HError(5221, "MaskNMatrix: Matrix column inconsistent");
+    }
+
+#ifdef CUDA
+    MulNMatrixByColCUDA(valMat->devElems, segVec->devElems, row, segVec->vecLen, resMat->devElems);
+#else
+    MulNMatrixByColCPU(valMat->matElems, segVec->vecElems, row, segVec->vecLen, resMat->matElems);
+#endif
+
+}
+
 /* ------------------------- End of HMath.c ------------------------- */

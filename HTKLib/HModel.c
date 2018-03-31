@@ -623,6 +623,9 @@ void FreeANNSet(HMMSet *hset)  {
     /* pop the last item annSet (MSTAK) */
     /*Dispose(hset->hmem, hset->annSet);*/
     /*Dispose(&gcheap, hset->annSet);*/
+
+    /* cl9p8 - free dropout mask */
+    FreeDropoutMask();
 }
 
 void ShowANNSet(HMMSet *hset) {
@@ -766,6 +769,8 @@ void InitTrainInfo(HMMSet *hset, Boolean initLabMats, Boolean initLRInfo, Boolea
             if (layerElem->trainInfo == NULL) {
                 layerElem->trainInfo = (TrainInfo *) New(hset->hmem, sizeof(TrainInfo));
                 memset(layerElem->trainInfo, 0, sizeof(TrainInfo));
+                /* cl9p8 - dropoutRate */
+                layerElem->trainInfo->dropoutRate = 0.0;
 #ifdef MKL
                 if (layerElem->actfunKind == SIGMOIDAF)
                     RegisterTmpNMat(GetNBatchSamples(), layerElem->nodeNum);

@@ -206,6 +206,7 @@ typedef struct _TrainInfo {
     /*ANNUpdtKind updateFlag;*/     /* whether update this layer or not */
     /*long actfunUpdateFlag;*/	/* cz277 - 150811 */
     Boolean initFlag;		/* cz277 - 150811 */
+    float dropoutRate;   /* cl9p8 - dropout rate */
 } TrainInfo;
 
 typedef struct _ANNInfo {
@@ -350,6 +351,12 @@ void SetFeaMixBatchIndex(ANNSet *annSet, int index);
 
 void CreateBundleTrace(MemHeap *heap, LELink layerElem, BTLink *head);
 void CancelBundleTrace(MemHeap *heap, LELink layerElem, BTLink *head);
+
+/* cl9p8 - dropout */
+void CreateDropoutMask(ANNSet *annSet);
+void FreeDropoutMask(void);
+void SetDropoutEnabled(Boolean flag);
+void ApplyDropoutMask(LELink layerElem, int batLen);
 
 
 #ifdef __cplusplus
