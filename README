@@ -1,5 +1,15 @@
+!!! IMPORTANT !!!
+=================
+Please register at https://htk.eng.cam.ac.uk/register.shtml before you
+continue reading/using the code here.
+
+The Hidden Markov Toolkit (HTK) is made available free of charge and can
+be downloaded from the HTK website. However it may not be redistributed,
+i.e. you must register at the website and download it from there. 
+
+
 Hidden Markov Toolkit (HTK) 3.5 Beta
-                ====================================
+====================================
 
 Use of this software is governed by a license agreement, the terms and
 conditions of which are set forth in the file LICENSE in the
