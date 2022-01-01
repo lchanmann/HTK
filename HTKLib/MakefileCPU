@@ -42,7 +42,8 @@ hlib = .
 HLIBS = ${exec_prefix}/lib/HTKLib.a
 
 CC     = gcc
-CFLAGS := $(CFLAGS) -m64 -ansi -std=gnu99 -D_SVID_SOURCE -DOSS_AUDIO -D'ARCH="x86_64"' -Wall -Wno-switch -g -O2 -I. -DPHNALG
+# cl9p8 - fix cpu build on macOS
+CFLAGS := $(CFLAGS) -m64 -ansi -std=gnu99 -D_SVID_SOURCE -DNO_AUDIO -D'ARCH="x86_64"' -Wall -Wno-switch -g -O2 -I. -DPHNALG
 LDFLAGS = -lpthread -lm
 RANLIB = ranlib
 INSTALL= /usr/bin/install -c

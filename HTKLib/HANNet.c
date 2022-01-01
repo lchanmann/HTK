@@ -60,6 +60,8 @@ static int trace = 0;
 
 #define T_TOP 0001
 #define T_CCH 0002
+/* cl9p8 - fix cpu build on macOS */
+#define MAX(a, b) ((a)>(b)? (a): (b))
 
 /* --------------------------- Memory Management --------------------------- */
 
@@ -135,6 +137,8 @@ void InitANNet(void)
 {
     int intVal;
     ConfParam *cpVal;
+    /* cl9p8 - fix cpu build on macOS */
+    double doubleVal;
 
     /* cz277 - 150811 */
     strcpy(ANNUpdateFlagStr, "");

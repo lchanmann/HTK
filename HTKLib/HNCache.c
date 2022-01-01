@@ -1931,7 +1931,7 @@ Boolean FillAllInpBatch(DataCache *cache, int *nSamples, int *uttCnt) {
 
 /* cl9p8 - target penalty */
 /* adjust log state occ weight and update the log prior list  */
-void UpdateTargetPenalty(DataCache *cache, float weight, float offset);
+void UpdateTargetPenalty(DataCache *cache, float weight, float offset) {
     /*HMMSet *hset;*/
     MLink m, mret;
     HLink hmm;
