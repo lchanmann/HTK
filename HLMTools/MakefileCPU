@@ -44,7 +44,7 @@ llib    = 	../HLMLib
 HLIBS   = 	$(hlib)/HTKLib.a $(llib)/HLMLib.a
 CC      = 	gcc
 # cl9p8 - fix cpu build on macOS
-CFLAGS  = 	-m64 -ansi -std=gnu99 -D_SVID_SOURCE -DNO_AUDIO -D'ARCH="x86_64"' -Wall -Wno-switch -g -O2 -I$(hlib) -I$(llib) 
+CFLAGS  = 	-m64 -ansi -std=gnu99 -D_SVID_SOURCE -DALSA_AUDIO -D'ARCH="x86_64"' -Wall -Wno-switch -g -O2 -I$(hlib) -I$(llib) 
 LDFLAGS = 	-L/usr/X11R6/lib  $(HLIBS) -lpthread -lm
 INSTALL = 	/usr/bin/install -c
 PROGS   =	Cluster HLMCopy LAdapt LBuild LFoF \

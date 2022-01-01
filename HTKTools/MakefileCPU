@@ -43,7 +43,7 @@ oldincludedir = /usr/include
 
 CC      = 	gcc
 # cl9p8 - fix cpu build on macOS
-CFLAGS  = 	-m64 -ansi -D_SVID_SOURCE -DNO_AUDIO -D'ARCH="x86_64"' -Wall -Wno-switch -g -O2 -I$(inc) -DPHNALG
+CFLAGS  = 	-m64 -ansi -D_SVID_SOURCE -DALSA_AUDIO -D'ARCH="x86_64"' -Wall -Wno-switch -g -O2 -I$(inc) -DPHNALG
 LDFLAGS =      -L/usr/X11R6/lib -lpthread -lm
 INSTALL = 	/usr/bin/install -c
 PROGS   = 	HBuild HCompV HCopy HDMan \

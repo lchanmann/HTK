@@ -41,7 +41,7 @@ oldincludedir = /usr/include
 
 CC = gcc
 # cl9p8 - fix cpu build on macOS
-CFLAGS = -m64 -ansi -std=gnu99 -D_SVID_SOURCE -DNO_AUDIO -D'ARCH="x86_64"' -Wall -Wno-switch -g -O2 -DSANITY -I. -I../HTKLib/
+CFLAGS = -m64 -ansi -std=gnu99 -D_SVID_SOURCE -DALSA_AUDIO -D'ARCH="x86_64"' -Wall -Wno-switch -g -O2 -DSANITY -I. -I../HTKLib/
 RANLIB = ranlib
 INSTALL = /usr/bin/install -c
 target  = HLMLib.a
